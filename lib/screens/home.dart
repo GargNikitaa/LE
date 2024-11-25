@@ -101,42 +101,67 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                     SizedBox(height: 20),
-                    _buildActionButton(
-                      context,
-                      icon: Icons.chat_bubble_outline,
-                      title: 'Connect with Chatbot',
-                      description:
-                          'Start a conversation with our legal chatbot.',
-                      onPressed: () {
-                        Navigator.push(
+                    FutureBuilder<Map<String, String>>(
+                      future: Future.wait([
+                        languageProvider.translateText("Connect with Chatbot"),
+                        languageProvider.translateText(
+                            "Start a conversation with our legal chatbot."),
+                      ]).then((values) => {
+                            "title": values[0],
+                            "description": values[1],
+                          }),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) {
+                          return Text("Loading...");
+                        }
+                        return _buildActionButton(
                           context,
-                          MaterialPageRoute(builder: (context) => ChatScreen()),
+                          icon: Icons.chat_bubble_outline,
+                          title: snapshot.data!['title']!,
+                          description: snapshot.data!['description']!,
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => ChatScreen()),
+                            );
+                          },
                         );
                       },
                     ),
                     SizedBox(height: 10),
 
                     // Feature Section: Why we use LegalEase?
-                    Center(
-                      child: Text(
-                        'Why Use LegalEase?',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF1A237E),
-                        ),
-                      ),
+                    FutureBuilder<String>(
+                      future:
+                          languageProvider.translateText("Why Use LegalEase?"),
+                      builder: (context, snapshot) {
+                        return Center(
+                          child: Text(
+                            snapshot.data ?? "Loading...",
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF1A237E),
+                            ),
+                          ),
+                        );
+                      },
                     ),
                     SizedBox(height: 20),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         _buildFeatureCard(
-                          title: 'Make FIR Easy',
+                          context,
+                          languageProvider,
+                          titleKey: "Make FIR Easy",
                           imagePath: 'assets/fir_image.jpg',
                         ),
                         _buildFeatureCard(
-                          title: 'Best Accuracy',
+                          context,
+                          languageProvider,
+                          titleKey: "Best Accuracy",
                           imagePath: 'assets/accuracy_image.jpg',
                         ),
                       ],
@@ -201,53 +226,60 @@ class _HomePageState extends State<HomePage> {
   }
 
   // Custom Feature Card Widget
-  Widget _buildFeatureCard({
-    required String title,
+  Widget _buildFeatureCard(
+    BuildContext context,
+    LanguageProvider languageProvider, {
+    required String titleKey,
     required String imagePath,
   }) {
-    return Container(
-      width: 140,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        color: Colors.white.withOpacity(0.1),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black38,
-            blurRadius: 8,
-            offset: Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Container(
-            height: 100,
-            width: 120,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-              image: DecorationImage(
-                image: AssetImage(imagePath),
-                fit: BoxFit.cover,
+    return FutureBuilder<String>(
+      future: languageProvider.translateText(titleKey),
+      builder: (context, snapshot) {
+        return Container(
+          width: 140,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            color: Colors.white.withOpacity(0.1),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black38,
+                blurRadius: 8,
+                offset: Offset(0, 4),
               ),
-            ),
+            ],
           ),
-          Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: Text(
-              title,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF1A237E),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                height: 100,
+                width: 120,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                  image: DecorationImage(
+                    image: AssetImage(imagePath),
+                    fit: BoxFit.cover,
+                  ),
+                ),
               ),
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
+              Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: Text(
+                  snapshot.data ?? "Loading...",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF1A237E),
+                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
