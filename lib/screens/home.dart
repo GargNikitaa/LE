@@ -1,7 +1,11 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'chat.dart';
 import 'ipc_section_screen.dart';
+import 'package:provider/provider.dart';
+import 'language_provider.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -9,8 +13,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  // ignore: unused_field
   int _currentSlideIndex = 0;
+
   final List<String> imgList = [
     'assets/police_station_1.jpg',
     'assets/police_station_2.jpg',
@@ -19,6 +23,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final languageProvider = Provider.of<LanguageProvider>(context);
     return Scaffold(
       body: Stack(
         children: [
@@ -31,7 +36,7 @@ class _HomePageState extends State<HomePage> {
               height: MediaQuery.of(context).size.height * 0.5,
               child: CarouselSlider(
                 options: CarouselOptions(
-                  height: double.infinity,
+                  height: MediaQuery.of(context).size.height * 0.5,
                   autoPlay: true,
                   viewportFraction: 1.0,
                   onPageChanged: (index, reason) {
@@ -41,28 +46,16 @@ class _HomePageState extends State<HomePage> {
                   },
                 ),
                 items: imgList.map((imagePath) {
-                  return Builder(
-                    builder: (BuildContext context) {
-                      return Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          Image.asset(imagePath, fit: BoxFit.cover),
-                          Container(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  Colors.black.withOpacity(0.6),
-                                  Colors.transparent,
-                                ],
-                                begin: Alignment.bottomCenter,
-                                end: Alignment.topCenter,
-                              ),
-                            ),
-                          ),
-                          // Removed the text here
-                        ],
-                      );
-                    },
+                  return Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      Image.asset(
+                        imagePath,
+                        fit: BoxFit.cover,
+                        color: Colors.black.withOpacity(0.6),
+                        colorBlendMode: BlendMode.darken,
+                      ),
+                    ],
                   );
                 }).toList(),
               ),
@@ -74,8 +67,8 @@ class _HomePageState extends State<HomePage> {
             top: MediaQuery.of(context).size.height * 0.45,
             left: 0,
             right: 0,
-            child: SingleChildScrollView( // Added SingleChildScrollView
-              padding: EdgeInsets.only(top: 30.0), // Adjusted padding to avoid overflow
+            bottom: 0,
+            child: SingleChildScrollView(
               child: Container(
                 padding: EdgeInsets.symmetric(vertical: 30.0, horizontal: 20.0),
                 decoration: BoxDecoration(
@@ -95,32 +88,32 @@ class _HomePageState extends State<HomePage> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     // Two Primary Action Buttons
-                    _buildActionButton(
-                      context,
-                      icon: Icons.info_outline,
-                      title: 'IPC Section Info',
-                      description: 'Get detailed information on IPC Sections.',
+                    ElevatedButton(
                       onPressed: () {
-            //             Navigator.push(
-            //   context,
-            //   MaterialPageRoute(builder: (context) => IPCListingScreen()),
-            // );
+                        Navigator.pushNamed(context, '/ipc');
                       },
+                      child: FutureBuilder<String>(
+                        future: languageProvider
+                            .translateText("Go to IPC Section Finder"),
+                        builder: (context, snapshot) {
+                          return Text(snapshot.data ?? "Loading...");
+                        },
+                      ),
                     ),
                     SizedBox(height: 20),
                     _buildActionButton(
                       context,
                       icon: Icons.chat_bubble_outline,
                       title: 'Connect with Chatbot',
-                      description: 'Start a conversation with our legal chatbot.',
+                      description:
+                          'Start a conversation with our legal chatbot.',
                       onPressed: () {
                         Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => ChatScreen()), // Navigate to SignUp screen
-                  );
+                          context,
+                          MaterialPageRoute(builder: (context) => ChatScreen()),
+                        );
                       },
                     ),
-
                     SizedBox(height: 10),
 
                     // Feature Section: Why we use LegalEase?
@@ -140,11 +133,11 @@ class _HomePageState extends State<HomePage> {
                       children: [
                         _buildFeatureCard(
                           title: 'Make FIR Easy',
-                          imagePath: 'assets/fir_image.jpg', // Replace with your image
+                          imagePath: 'assets/fir_image.jpg',
                         ),
                         _buildFeatureCard(
                           title: 'Best Accuracy',
-                          imagePath: 'assets/accuracy_image.jpg', // Replace with your image
+                          imagePath: 'assets/accuracy_image.jpg',
                         ),
                       ],
                     ),
@@ -159,8 +152,13 @@ class _HomePageState extends State<HomePage> {
   }
 
   // Custom Action Button Widget
-  Widget _buildActionButton(BuildContext context,
-      {required IconData icon, required String title, required String description, required Function onPressed}) {
+  Widget _buildActionButton(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String description,
+    required VoidCallback onPressed,
+  }) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
@@ -169,12 +167,12 @@ class _HomePageState extends State<HomePage> {
         ),
         elevation: 4,
       ),
-      onPressed: () => onPressed(),
+      onPressed: onPressed,
       child: Row(
         children: [
           Icon(icon, color: Colors.white, size: 30),
           SizedBox(width: 15),
-          Expanded( // Use Expanded to prevent overflow
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -203,7 +201,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   // Custom Feature Card Widget
-  Widget _buildFeatureCard({required String title, required String imagePath}) {
+  Widget _buildFeatureCard({
+    required String title,
+    required String imagePath,
+  }) {
     return Container(
       width: 140,
       decoration: BoxDecoration(
@@ -241,6 +242,8 @@ class _HomePageState extends State<HomePage> {
                 color: Color(0xFF1A237E),
               ),
               textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
