@@ -1,4 +1,4 @@
-# legalease_app
+# legalease
 
 A new Flutter project.
 

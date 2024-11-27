@@ -1,6 +1,6 @@
 {
-    "name": "legalease_app",
-    "short_name": "legalease_app",
+    "name": "legalease",
+    "short_name": "legalease",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
